@@ -1,9 +1,9 @@
-package org.example.cargo.dto.user;
+package org.example.cargo.domain.user;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
-import org.example.cargo.dto.BaseEntity;
+import org.example.cargo.domain.BaseEntity;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;

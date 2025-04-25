@@ -1,4 +1,4 @@
-package org.example.cargo.dto.user;
+package org.example.cargo.domain.user;
 
 import jakarta.persistence.*;
 import lombok.*;

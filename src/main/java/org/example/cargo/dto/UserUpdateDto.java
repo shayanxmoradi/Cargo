@@ -1,4 +1,4 @@
 package org.example.cargo.dto;
 
-public class Travel {
+public class UserUpdateDto {
 }
