@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Length;
 
 public record UserCreateDto(
         @With Long id,
-        @Length(min = 3, max = 30, message = "should be greather than 3 and less than 30")
+        @Length(min = 3, max = 30, message = "should be greater than 3 and less than 30")
         @NotBlank(message = "first name is required")
         String firstName,
         String lastName,
@@ -19,6 +19,9 @@ public record UserCreateDto(
         @Size(min = 8, max = 8, message = "The length must be exactly 8 characters.")
         @NotBlank(message = "password is required")
         @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d).+$", message = "Password must contain a combination of letters and numbers")
-        String password){
+        String password,
+        @NotBlank(message = "username is required")
+        @Length(min = 3, max = 30, message = "should be greater than 3 and less than 30")
+        String username) {
 
 }

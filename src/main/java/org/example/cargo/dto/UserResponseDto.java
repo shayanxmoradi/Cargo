@@ -1,4 +1,8 @@
 package org.example.cargo.dto;
 
-public class UserResponseDto {
+public record UserResponseDto(  Long id,
+                                String firstName,
+                                String lastName,
+                                String email,
+                                String username) {
 }
