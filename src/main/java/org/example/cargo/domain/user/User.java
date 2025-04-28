@@ -20,6 +20,7 @@ public class User extends BaseUser {
     @Column(nullable = false,name=USER_NAME)
     @Length(min = 3, max = 30, message = "should be at least 3 and max 30 characters")
     private String username;
+
 }
 
 

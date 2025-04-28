@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
+@AllArgsConstructor
+
+@RequiredArgsConstructor
 
 public abstract class CrudServiceImpl<
         ID,
@@ -23,11 +26,11 @@ public abstract class CrudServiceImpl<
         > implements CrudService<ID, R, C, U> {
 
     // The repository to interact with the database (JpaRepository)
-    protected final JpaRepository<E, ID> repository;
+    protected  JpaRepository<E, ID> repository;
 
-    public CrudServiceImpl(JpaRepository<E, ID> repository) {
-        this.repository = repository;
-    }
+//    public CrudServiceImpl(JpaRepository<E, ID> repository) {
+//        this.repository = repository;
+//    }
 
 
     // Abstract mapping methods to be implemented in child service
