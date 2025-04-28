@@ -19,45 +19,44 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl extends CrudServiceImpl<Long, User, UserResponseDto, UserCreateDto, UserUpdateDto>implements UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+        super(userRepository);
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
-//    private final UserMapper userMapper;
-//
-//    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
-//        this.userRepository = userRepository;
-//        this.userMapper = userMapper;
-//    }
 
 
     @Override
     protected User mapCreateDtoToEntity(UserCreateDto createDto) {
-        return null;
+        return userMapper.fromCreateDto(createDto);
     }
 
     @Override
     protected User mapUpdateDtoToEntity(UserUpdateDto updateDto, User existingEntity) {
-        return null;
+         userMapper.updateUserFromDto(updateDto,existingEntity);
+         return existingEntity;
     }
 
     @Override
     protected UserResponseDto mapEntityToResponseDto(User entity) {
-        return null;
+        return userMapper.toResponseDto(entity);
     }
 
     @Override
     protected Long extractIdFromUpdateDto(UserUpdateDto updateDto) {
-        return 0l;
+        return updateDto.id();
     }
 
     @Override
     public Optional<UserResponseDto> findByUsername(String username) {
-        return Optional.empty();
+        return userRepository.findByUsername(username).map(userMapper::toResponseDto);
     }
 
     @Override
     public Page<UserResponseDto> findAll(Pageable pageable) {
-        return null;
+        return userRepository.findAll(pageable)
+                .map(userMapper::toResponseDto);
     }
 }
