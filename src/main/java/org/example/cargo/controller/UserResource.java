@@ -1,5 +1,8 @@
 package org.example.cargo.controller;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.info.Info;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.cargo.dto.PasswordUpdateDto;
@@ -20,11 +23,13 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
+@OpenAPIDefinition(info = @Info(title = "Cargo app",version = "1.0",description = "here is overal description of my APIs"))
 public class UserResource {
 
     private final UserService userService;
 
     @PostMapping
+    @Operation(summary = "its just summary for Documentation")
     public ResponseEntity<UserResponseDto> createUser(@RequestBody @Validated UserCreateDto userCreateDto) {
         UserResponseDto createdUser = userService.save(userCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
