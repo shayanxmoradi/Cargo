@@ -8,7 +8,6 @@ import lombok.With;
 import org.hibernate.validator.constraints.Length;
 
 public record UserCreateDto(
-        @With Long id,
         @Length(min = 3, max = 30, message = "should be greater than 3 and less than 30")
         @NotBlank(message = "first name is required")
         String firstName,
