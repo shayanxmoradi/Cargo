@@ -60,7 +60,7 @@ public class UserResourceIT {
 
         testUser2 = new User();
         testUser2.setUsername("testuser2");
-        testUser1.setPassword("password");
+        testUser2.setPassword("password");
         testUser2.setFirstName("Another");
         testUser2.setLastName("UserTwo");
         testUser2.setEmail("test2@example.com");
@@ -101,8 +101,8 @@ public class UserResourceIT {
                 .andExpect(jsonPath("$.email", is("New@gmail.com")));
 
         // 3. Assert (Optional): Verify persistence in the database
-//        assertTrue(userRepository.findByUsername("usinglane").isPresent(),
-//                "User 'newuser' should exist in the database after creation.");
+        assertTrue(userRepository.findByUsername("usinglane").isPresent(),
+                "User 'newuser' should exist in the database after creation.");
     }
 
 }
