@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.example.cargo.domain.user.User;
 import org.example.cargo.dto.UserCreateDto;
+import org.example.cargo.dto.UserPatchDto;
 import org.example.cargo.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,15 +15,27 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import static org.hamcrest.Matchers.*; // Import Hamcrest matchers
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue; // Import assertTrue
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*; // Import MockMvcRequestBuilders
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*; // Import MockMvcResultMatchers
+
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
+
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
+import org.junit.jupiter.api.Test;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print; // For debugging output
+
 @SpringBootTest // load full spring applicaiton context
 @AutoConfigureMockMvc // configures mockmvc for sending http req without server
 @ActiveProfiles("test")//uses tset.propteries
@@ -65,7 +78,7 @@ public class UserResourceIT {
     }
 
     @Test
-    void contextLoads()  {
+    void contextLoads() {
         assertNotNull(mockMvc);
         assertNotNull(objectMapper);
         assertNotNull(userRepository);
@@ -122,7 +135,7 @@ public class UserResourceIT {
     void getUserById_whenuserDoesNotExist_shouldReturnNotFound() throws Exception {
         int nonexistentId = 9999;
         mockMvc.perform(get("/user/{id}", nonexistentId)
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
@@ -155,9 +168,69 @@ public class UserResourceIT {
                 .andExpect(jsonPath("$.content[1].username", is(testUser2.getUsername())));
     }
 
-//    @Test
-//    void updateUser_whenUserExists_shouldReturnUpdatedUser() throws Exception {
-//        UserPatchDto userPatchDto = new UserPatchDto(testUser1.getId(),);
-//        mockMvc.perform(patch("/user/{id}", testUser1.getId(),))
-//    }
+
+    @Test
+    void updateUser_whenUserExists_shouldReturnUpdatedUser() throws Exception {
+        UserPatchDto changedFirstName = UserPatchDto.builder().firstName("xmm").build();
+        mockMvc.perform(patch("/user/{id}", testUser1.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(changedFirstName)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is((int) testUser1.getId().longValue())))
+                .andExpect(jsonPath("$.username", is(testUser1.getUsername())))
+                .andExpect(jsonPath("$.firstName", is(changedFirstName.getFirstName())))
+                .andExpect(jsonPath("$.lastName", is(testUser1.getLastName())))
+                .andExpect(jsonPath("$.email", is(testUser1.getEmail())));
+
+        //Assert verfiy DB
+        User patchedUserFromDb = userRepository.findById(testUser1.getId()).orElseThrow();
+        assertEquals("xmm", patchedUserFromDb.getFirstName());
+        assertEquals(testUser1.getLastName(), patchedUserFromDb.getLastName());
+        assertEquals(testUser1.getEmail(), patchedUserFromDb.getEmail());
+        assertEquals(testUser1.getUsername(), patchedUserFromDb.getUsername());
+    }
+
+    @Test
+    void updateUser_whenUserDoesNotExist_shouldReturnNotFound() throws Exception {
+        int nonexistentId = 9999;
+        UserPatchDto changedFirstName = UserPatchDto.builder().firstName("xmm").build();
+
+        mockMvc.perform(patch("/user/{id}", nonexistentId).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(changedFirstName)))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    void deleteUser_whenUserExists_shouldReturnNoContent() throws Exception {
+        long userIdToDelete = testUser1.getId();
+        long initialCount = userRepository.count(); // Should be 2
+
+        mockMvc.perform(delete("/user/{id}", userIdToDelete))
+                .andDo(print())
+                .andExpect(status().isNoContent()); // Expect HTTP 204 No Content
+
+        // Assert (Optional): Verify user is actually deleted from the database
+        assertFalse(userRepository.findById(userIdToDelete).isPresent(),
+                "User with ID " + userIdToDelete + " should have been deleted.");
+        assertEquals(initialCount - 1, userRepository.count(),
+                "User count should decrease by 1 after deletion.");
+    }
+    @Test
+    void deleteUser_whenUserDoesNotExist_shouldReturnNoContent() throws Exception {
+        long nonExistentId = 9999L;
+        long initialCount = userRepository.count(); // Should be 2
+
+        mockMvc.perform(delete("/user/{id}", nonExistentId))
+                .andDo(print())
+                // Expect 204 No Content even if the user doesn't exist (idempotent)
+                .andExpect(status().isNoContent());
+
+        // Assert: Verify database state hasn't changed
+        assertEquals(initialCount, userRepository.count(),
+                "User count should remain unchanged when deleting a non-existent user.");
+    }
+
 }
