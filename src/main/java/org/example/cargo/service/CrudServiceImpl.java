@@ -46,8 +46,9 @@ public abstract class CrudServiceImpl<
     }
 
     @Override
-    public R update(U updateDto) {
-        ID id = extractIdFromUpdateDto(updateDto);
+    public R update(ID id,U updateDto) {
+        //ID id = extractIdFromUpdateDto(updateDto);
+
         E existing = repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Entity not found with ID: " + id));
         E updated = mapUpdateDtoToEntity(updateDto, existing);
@@ -66,12 +67,7 @@ public abstract class CrudServiceImpl<
         return entityOptional.map(this::mapEntityToResponseDto); // or .map(entity -> mapEntityToResponseDto(entity))
     }
 
-//    @Override
-//    public R findById(ID id) {
-//        E entity = repository.findById(id)
-//                .orElseThrow(() -> new NoSuchElementException("Entity not found with ID: " + id));
-//        return mapEntityToResponseDto(entity);
-//    }
+
 
     @Override
     public List<R> findAll() {
@@ -84,5 +80,5 @@ public abstract class CrudServiceImpl<
     /**
      * Extracts ID from the update DTO. Should be implemented in the child class.
      */
-    protected abstract ID extractIdFromUpdateDto(U updateDto);
+ //   protected abstract ID extractIdFromUpdateDto(U updateDto);
 }

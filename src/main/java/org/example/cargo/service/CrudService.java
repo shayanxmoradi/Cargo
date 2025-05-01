@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 public interface CrudService<ID, R, C, U> {
     R save(C createDto);
 
-    R update(U updateDto);
+    R update(ID id,U updateDto);
 
     void deleteById(ID id);
 

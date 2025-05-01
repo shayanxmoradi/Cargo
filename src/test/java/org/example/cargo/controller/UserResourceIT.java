@@ -5,16 +5,13 @@ import jakarta.transaction.Transactional;
 import org.example.cargo.domain.user.User;
 import org.example.cargo.dto.UserCreateDto;
 import org.example.cargo.repository.UserRepository;
-import org.example.cargo.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -130,4 +127,37 @@ public class UserResourceIT {
                 .andExpect(status().isNotFound());
     }
 
+
+    @Test
+    void getAllUsers_shouldReturnUserPage() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/user")
+                        .param("page", "0") // Request the first page
+                        .param("size", "10") // Request page size of 10
+                        // Optional: Add sort parameter for predictable order if needed
+                        // .param("sort", "username,asc")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk()) // Expect HTTP 200 OK
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON)) // Expect JSON response
+                // Check page metadata
+                .andExpect(jsonPath("$.totalElements", is(2))) // Should have 2 users in total
+                .andExpect(jsonPath("$.totalPages", is(1))) // Should be 1 page total for size 10
+                .andExpect(jsonPath("$.size", is(10))) // The page size should be 10
+                .andExpect(jsonPath("$.number", is(0))) // The page number should be 0
+                // Check the content array
+                .andExpect(jsonPath("$.content", hasSize(2))) // The content array should have 2 users
+                // Check details of the first user in the content (assuming default ID sort)
+                .andExpect(jsonPath("$.content[0].id", is((int) testUser1.getId().longValue())))
+                .andExpect(jsonPath("$.content[0].username", is(testUser1.getUsername())))
+                // Check details of the second user
+                .andExpect(jsonPath("$.content[1].id", is((int) testUser2.getId().longValue())))
+                .andExpect(jsonPath("$.content[1].username", is(testUser2.getUsername())));
+    }
+
+//    @Test
+//    void updateUser_whenUserExists_shouldReturnUpdatedUser() throws Exception {
+//        UserPatchDto userPatchDto = new UserPatchDto(testUser1.getId(),);
+//        mockMvc.perform(patch("/user/{id}", testUser1.getId(),))
+//    }
 }
