@@ -2,10 +2,12 @@ package org.example.cargo.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 import lombok.Data;
 import lombok.With;
 import org.hibernate.validator.constraints.Length;
 @Data
+@Builder
 public class UserPatchDto{
     // ID is typically provided in the URL path for PATCH, not in the body.
 
