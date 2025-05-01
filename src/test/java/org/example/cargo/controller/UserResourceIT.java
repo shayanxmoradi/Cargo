@@ -105,4 +105,29 @@ public class UserResourceIT {
                 "User 'newuser' should exist in the database after creation.");
     }
 
+    @Test
+    void geUserById_whenUserExists_shouldReturnUser() throws Exception {
+
+        mockMvc.perform(get("/user/{id}", testUser1.getId()) // Use the ID of the user created in setUp
+                        .accept(MediaType.APPLICATION_JSON)) // Indicate we want JSON response
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is((int) testUser1.getId().longValue())))
+                .andExpect(jsonPath("$.username", is(testUser1.getUsername())))
+                .andExpect(jsonPath("$.firstName", is(testUser1.getFirstName())))
+                .andExpect(jsonPath("$.lastName", is(testUser1.getLastName())))
+                .andExpect(jsonPath("$.email", is(testUser1.getEmail())));
+
+    }
+
+    @Test
+    void getUserById_whenuserDoesNotExist_shouldReturnNotFound() throws Exception {
+        int nonexistentId = 9999;
+        mockMvc.perform(get("/user/{id}", nonexistentId)
+                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
 }

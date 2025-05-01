@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 
 @RequiredArgsConstructor
-
+//  handle exceptions in the service layer, but only when it's part of your business logic
 public abstract class CrudServiceImpl<
         ID,
         E,    // Entity type
@@ -61,9 +61,9 @@ public abstract class CrudServiceImpl<
     }
     @Override
     public Optional<R> findById(ID id) {
-        E entity = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Entity not found with ID: " + id));
-        return Optional.ofNullable(mapEntityToResponseDto(entity));
+        Optional<E> entityOptional = repository.findById(id);
+        // Map the entity to the response DTO only if it's present
+        return entityOptional.map(this::mapEntityToResponseDto); // or .map(entity -> mapEntityToResponseDto(entity))
     }
 
 //    @Override
