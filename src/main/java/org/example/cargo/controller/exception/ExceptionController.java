@@ -175,4 +175,6 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND); // Return 404
         // Or simply: return ResponseEntity.notFound().build();
     }
+
+    
 }

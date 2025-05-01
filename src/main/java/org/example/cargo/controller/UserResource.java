@@ -48,30 +48,12 @@ public class UserResource {
         return ResponseEntity.ok(users);
     }
 
-    //    @PatchMapping("/{id}")
-//    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long id, @RequestBody @Validated UserUpdateDto patchDto) {
-//
-//        try {
-//            UserResponseDto updatedUser = userService.patch(id, patchDto); // Call the appropriate service method
-//            return ResponseEntity.ok(updatedUser); // Return 200 OK with the updated resource
-//        } catch (ConfigDataResourceNotFoundException e) { // Catch specific exception from service
-//            // Log the exception if needed
-//            return ResponseEntity.notFound().build(); // Return 404 Not Found
-//        } catch (Exception e) {
-//            // Handle other potential exceptions (e.g., validation constraints violation if not handled globally)
-//            // Log error
-//            return ResponseEntity.status(500).build(); // Or appropriate error code
-//        }
-//
-//    }
-    // --- PUT (Full Update) ---
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing user (full update)") // Example operation summary
     public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable Long id,
             @RequestBody @Validated UserUpdateDto updateDto) {
         log.info("Request to update user with id: {}, data: {}", id, updateDto); // Example logging
-        // Note: PUT typically requires the full resource representation.
         // Validation ensures the incoming DTO is complete and valid.
         try {
             // *** CORRECTED ARGUMENT ORDER HERE ***
@@ -110,12 +92,5 @@ public class UserResource {
         return ResponseEntity.noContent().build();
     }
 
-//    @PatchMapping("/{id}/password")
-//    public ResponseEntity<Void> updatePassword(@PathVariable Long id, @RequestBody @Validated PasswordUpdateDto passwordUpdateDto) {
-//        if (!id.equals(passwordUpdateDto.id())) {
-//            return ResponseEntity.badRequest().build(); // ID mismatch
-//        }
-//        userService.updatePassword(id, passwordUpdateDto);
-//        return ResponseEntity.noContent().build();
-//    }
+
 }

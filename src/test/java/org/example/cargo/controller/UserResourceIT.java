@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import org.example.cargo.domain.user.User;
 import org.example.cargo.dto.UserCreateDto;
 import org.example.cargo.dto.UserPatchDto;
+import org.example.cargo.dto.UserUpdateDto;
 import org.example.cargo.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -212,7 +213,7 @@ public class UserResourceIT {
                 .andDo(print())
                 .andExpect(status().isNoContent()); // Expect HTTP 204 No Content
 
-        // Assert (Optional): Verify user is actually deleted from the database
+        // Assert
         assertFalse(userRepository.findById(userIdToDelete).isPresent(),
                 "User with ID " + userIdToDelete + " should have been deleted.");
         assertEquals(initialCount - 1, userRepository.count(),
@@ -225,12 +226,62 @@ public class UserResourceIT {
 
         mockMvc.perform(delete("/user/{id}", nonExistentId))
                 .andDo(print())
-                // Expect 204 No Content even if the user doesn't exist (idempotent)
                 .andExpect(status().isNoContent());
 
         // Assert: Verify database state hasn't changed
         assertEquals(initialCount, userRepository.count(),
                 "User count should remain unchanged when deleting a non-existent user.");
     }
+    @Test
+    void updateUser_whenValidInput_shouldReturnUpdatedUser() throws Exception {
 
+        UserUpdateDto updateDto = new UserUpdateDto(
+
+                "UpdatedPutFirst",
+                "UpdatedPutLast",
+                "updated.put.email@example.com",
+                "newUsername"
+        );
+
+        // Act & Assert
+        mockMvc.perform(put("/user/{id}", testUser1.getId()) // Use put() method
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDto))) // Send UserUpdateDto
+                .andDo(print())
+                .andExpect(status().isOk()) // Expect HTTP 200 OK
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is((int) testUser1.getId().longValue())))
+                .andExpect(jsonPath("$.firstName", is("UpdatedPutFirst")))
+                .andExpect(jsonPath("$.lastName", is("UpdatedPutLast")))
+                .andExpect(jsonPath("$.email", is("updated.put.email@example.com")))
+                .andExpect(jsonPath("$.username", is(testUser1.getUsername()))); // Username likely doesn't change
+
+        // Assert
+        User updatedUserFromDb = userRepository.findById(testUser1.getId()).orElseThrow();
+        assertEquals("UpdatedPutFirst", updatedUserFromDb.getFirstName());
+        assertEquals("UpdatedPutLast", updatedUserFromDb.getLastName());
+        assertEquals("updated.put.email@example.com", updatedUserFromDb.getEmail());
+        assertEquals(testUser1.getUsername(), updatedUserFromDb.getUsername());
+    }
+
+    @Test
+    void updateUser_whenUserNotFound_shouldReturnNotFound() throws Exception {
+        // Arrange: Use a non-existent ID
+        long nonExistentId = 9999L;
+        UserUpdateDto updateDto = new UserUpdateDto(
+
+                "AttemptedPutFirst",
+                "AttemptedPutLast",
+                "attempt.put@example.com",
+                "newUsername"
+        );
+
+        // Act & Assert
+        mockMvc.perform(put("/user/{id}", nonExistentId) // Use non-existent ID in path
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDto)))
+                .andDo(print())
+
+                .andExpect(status().isNotFound());
+    }
 }

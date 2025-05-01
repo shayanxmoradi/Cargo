@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.example.cargo.exception.ResourceNotFoundException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,12 +46,13 @@ public abstract class CrudServiceImpl<
         return mapEntityToResponseDto(saved);
     }
 
-    @Override
-    public R update(ID id,U updateDto) {
-        //ID id = extractIdFromUpdateDto(updateDto);
 
+
+    @Override
+    public R update(ID id, U updateDto) {
         E existing = repository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Entity not found with ID: " + id));
+                // Change the exception type here:
+                .orElseThrow(() -> new ResourceNotFoundException("Entity not found with ID: " + id));
         E updated = mapUpdateDtoToEntity(updateDto, existing);
         E saved = repository.save(updated);
         return mapEntityToResponseDto(saved);
