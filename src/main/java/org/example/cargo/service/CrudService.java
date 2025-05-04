@@ -20,6 +20,7 @@ public interface CrudService<ID, R, C, U> {
     void deleteById(ID id);
 
     Optional<R> findById(ID id);
+    boolean existsById(ID id);
 
     List<R> findAll();
 

@@ -35,13 +35,18 @@ public class UserResource {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
+//    @GetMapping("/{id}")
+//    public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
+//        return userService.findById(id)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         return userService.findById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
     }
-
     @GetMapping
     public ResponseEntity<Page<UserResponseDto>> getAllUsers(Pageable pageable) {
         Page<UserResponseDto> users = userService.findAll(pageable);
@@ -88,6 +93,9 @@ public class UserResource {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        if (!userService.existsById(id)) { // Check first
+            throw new ResourceNotFoundException("Cannot delete. Entity not found with ID: " + id);
+        }
         userService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

@@ -79,6 +79,10 @@ public abstract class CrudServiceImpl<
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean existsById(ID id) {
+        return repository.existsById(id);
+    }
     /**
      * Extracts ID from the update DTO. Should be implemented in the child class.
      */

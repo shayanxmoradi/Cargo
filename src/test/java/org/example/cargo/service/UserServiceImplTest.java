@@ -245,7 +245,24 @@ class UserServiceImplTest {
 
     @Test
     void delete_shouldCallRepositoryDelte(){
-        Long deletedUserId = 1L;
+        //arange
+        Long deletedUserId = sampleUser.getId();
+      //  when(mockUserRepository.findById(deletedUserId)).thenReturn(Optional.ofNullable(any(User.class)));
+        doNothing().when(mockUserRepository).deleteById(deletedUserId);
+
+        //act
+        userService.deleteById(deletedUserId);
+        //verify
+        //verify(mockUserRepository,times(1)).findById(deletedUserId);
+        verify(mockUserRepository,times(1)).deleteById(deletedUserId);
+        verifyNoMoreInteractions(mockUserRepository);
+        verifyNoInteractions(mockUserMapper);
 
     }
+    // Arrange : prepare evreything needed. inputs dtos . expected things.
+    // definde mock behaivier : wehen . donothing.
+    //act: call method on @Injectedmocks
+    //assert : verfiy method undertest produced the corerct result being excecuted in act. : assertEqual,asserttrue,assertnotnull
+    //verify : optional : verifys, argumentcaptor,
+
 }
