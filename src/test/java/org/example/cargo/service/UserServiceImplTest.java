@@ -355,6 +355,25 @@ class UserServiceImplTest {
     verifyNoMoreInteractions(mockUserRepository);
     verifyNoMoreInteractions(mockUserMapper);
 }
+
+@Test
+void findAll_shouldReturnListOfUserResponseDtos(){
+    List<User> userList = Collections.singletonList(sampleUser);
+
+    when(mockUserRepository.findAll()).thenReturn(userList);
+    when(mockUserMapper.toResponseDto(eq(sampleUser))).thenReturn(sampleResponseDto);//eq?
+
+
+        //Act
+    List<UserResponseDto> resultUsers = userService.findAll();
+    assertNotNull(resultUsers,"should return a list of users");
+    assertEquals(resultUsers.size(),userList.size(),"should return the correct number of users");
+
+    verify(mockUserRepository, times(1)).findAll();
+    verify(mockUserMapper, times(1)).toResponseDto(eq(sampleUser));
+    verifyNoMoreInteractions(mockUserRepository,mockUserMapper);
+}
+
     @Test
     void findAll_withPageable_shouldReturnUserDtoPage() {
         // Arrange
