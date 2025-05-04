@@ -5,6 +5,7 @@ import org.example.cargo.dto.UserCreateDto;
 import org.example.cargo.dto.UserMapper;
 import org.example.cargo.dto.UserResponseDto;
 import org.example.cargo.dto.UserUpdateDto;
+import org.example.cargo.exception.ResourceNotFoundException;
 import org.example.cargo.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -157,55 +158,20 @@ class UserServiceImplTest {
 
 
     @Test
-    void update_shouldReturnUpdatedUserDto() {
+    void update_whenUserDoesNotExist_shouldThrowResourceNotFoundException() {
+        Long nonExistenId = 999l;
+        UserUpdateDto updateDto = new UserUpdateDto("upis", "nopis", "as@gmail.com", "sfs");
+        when(mockUserRepository.findById(nonExistenId)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> userService.update(nonExistenId, updateDto), "shouold throw exception");
 
-        UserUpdateDto updateDto = new UserUpdateDto("shayan", "moradi", "shayan.moradi@gmail.com", "shayanxxxm");
-        User existingUser = sampleUser;
-
-        User updatedUserEntity = new User(); // Create a distinct object for clarity if needed
-        updatedUserEntity.setId(existingUser.getId());
-        updatedUserEntity.setUsername(existingUser.getUsername()); // Assume username isn't updated
-        updatedUserEntity.setPassword(existingUser.getPassword()); // Assume password isn't updated
-        updatedUserEntity.setFirstName(updateDto.firstName()); // Updated value
-        updatedUserEntity.setLastName(updateDto.lastName());   // Updated value
-        updatedUserEntity.setEmail(updateDto.email());       // Updated value
-
-        // Simulate the entity returned by repository.save()
-        User savedUpdatedUser = updatedUserEntity; // Often the same object reference after save
-
-
-        UserResponseDto expectedResponseDto = new UserResponseDto(
-                savedUpdatedUser.getId(),
-                savedUpdatedUser.getFirstName(),
-                savedUpdatedUser.getLastName(),
-                savedUpdatedUser.getEmail(),
-                savedUpdatedUser.getUsername()
-        );
-        when(mockUserRepository.findById(testUserId)).thenReturn(Optional.of(existingUser));
-        // when(mockUserMapper.updateUserFromDto(any(UserUpdateDto.class))).thenReturn();
-        when(mockUserRepository.save(any(User.class))).thenReturn(savedUpdatedUser);
-        when(mockUserMapper.toResponseDto(any(User.class))).thenReturn(expectedResponseDto);
-        UserResponseDto actualResponse = userService.update(sampleUser.getId(), updateDto);
-
-        assertNotNull(actualResponse);
-        assertEquals(expectedResponseDto, actualResponse);
-
-        //verify
-        ArgumentCaptor<User> userEntityCaptor = ArgumentCaptor.forClass(User.class);
-        verify(mockUserRepository,times(1)).findById(testUserId);
-        verify(mockUserMapper,times(1)).updateUserFromDto(eq(updateDto),eq(existingUser));
-        verify(mockUserRepository,times(1)).save(userEntityCaptor.capture());
-
-        assertEquals("shayan", userEntityCaptor.getValue().getFirstName());
-        assertEquals("moradi", userEntityCaptor.getValue().getLastName());
-        assertEquals("shayan.moradi@gmail.com", userEntityCaptor.getValue().getEmail());
-
-        verify(mockUserMapper,times(1)).toResponseDto(eq(savedUpdatedUser)) ;
-        verifyNoMoreInteractions(mockUserRepository, mockUserMapper);
-
-
+        verify(mockUserRepository, times(1)).findById(nonExistenId);
+        verify(mockUserMapper,never()).toResponseDto(any(User.class));
+        verify(mockUserRepository, never()).save(any(User.class));
+        verifyNoMoreInteractions(mockUserRepository);
+        verifyNoInteractions(mockUserMapper);
 
     }
+
     @Test
     void update_whenUserExists_shouldReturnUpdatedUserDto() {
         // Arrange: Input DTO
@@ -274,5 +240,12 @@ class UserServiceImplTest {
         verifyNoMoreInteractions(mockUserRepository, mockUserMapper);
     }
 
+    @Test
+    void delete_whenUserDoesNotExist_shouldReturnEmptyOptional() {}
 
+    @Test
+    void delete_shouldCallRepositoryDelte(){
+        Long deletedUserId = 1L;
+
+    }
 }
