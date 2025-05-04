@@ -34,6 +34,7 @@ class UserServiceImplTest {
     private User sampleUser;
     private UserResponseDto sampleResponseDto;
     private final Long testUserId = 1L;
+    private final Long nonExistentId=999l;
 
     @BeforeEach
     void setUpTestData() {
@@ -240,8 +241,34 @@ class UserServiceImplTest {
         verifyNoMoreInteractions(mockUserRepository, mockUserMapper);
     }
 
+//    @Test
+//    void delete_whenUserDoesNotExist_shouldReturnEmptyOptional() {
+//        Long nonExistenId = 999l;
+//        when(mockUserRepository.findById(nonExistenId)).thenReturn(Optional.empty());
+//        userService.deleteById(nonExistenId);
+//    verify(mockUserRepository, times(1)).findById(nonExistenId);
+//  //  verify(mockUserRepository, times(1)).findById(nonExistenId);
+//    verifyNoMoreInteractions(mockUserRepository);
+//    verifyNoInteractions(mockUserMapper);
+//    }
+
     @Test
-    void delete_whenUserDoesNotExist_shouldReturnEmptyOptional() {}
+    void existsById_whenUserDoesNotExist_shouldReturnFalse() {
+        // Arrange
+        Long nonExistentId = 99L;
+        when(mockUserRepository.existsById(nonExistentId)).thenReturn(false);
+
+        // Act
+        boolean result = userService.existsById(nonExistentId);
+
+        // Assert
+        assertFalse(result);
+
+        // Verify
+        verify(mockUserRepository, times(1)).existsById(nonExistentId);
+        verifyNoMoreInteractions(mockUserRepository);
+        verifyNoInteractions(mockUserMapper);
+    }
 
     @Test
     void delete_shouldCallRepositoryDelte(){
@@ -257,8 +284,70 @@ class UserServiceImplTest {
         verify(mockUserRepository,times(1)).deleteById(deletedUserId);
         verifyNoMoreInteractions(mockUserRepository);
         verifyNoInteractions(mockUserMapper);
-
     }
+
+    @Test
+    void existById_whenUserExists_shouldReturnTrue() {
+        Long existenId = sampleUser.getId();
+
+        when(mockUserRepository.existsById(existenId)).thenReturn(true);
+
+        boolean result = userService.existsById(existenId);
+        assertTrue(result,"should return true when user exists");
+
+        verify(mockUserRepository, times(1)).existsById(existenId);
+        verifyNoMoreInteractions(mockUserRepository);
+        verifyNoInteractions(mockUserMapper);
+    }
+    @Test
+    void existById_whenUserDoesNotExists_shouldReturnFalse() {
+
+        when(mockUserRepository.existsById(nonExistentId)).thenReturn(false);
+
+        boolean result = userService.existsById(nonExistentId);
+        assertFalse(result,"should return false when user does not exists");
+
+        verify(mockUserRepository, times(1)).existsById(nonExistentId);
+        verifyNoMoreInteractions(mockUserRepository);
+        verifyNoInteractions(mockUserMapper);
+    }
+
+@Test
+    void findByUsername_whenUserExists_shouldReturnUserDtoOptional() {
+        //Arrange
+        String existingUsername= sampleUser.getUsername();
+        when(mockUserRepository.findByUsername(existingUsername)).thenReturn(Optional.of(sampleUser));
+        when(mockUserMapper.toResponseDto(sampleUser)).thenReturn(sampleResponseDto);
+//Act
+    Optional<UserResponseDto> resualtOptional = userService.findByUsername(existingUsername);
+    //assert
+    assertTrue(resualtOptional.isPresent(),"shoult be present when username exists");
+    assertEquals(resualtOptional.get(),sampleResponseDto,"should return the correct user");
+    //verify
+    verify(mockUserRepository, times(1)).findByUsername(existingUsername);
+    verify(mockUserMapper,times(1)).toResponseDto(sampleUser);
+    verifyNoMoreInteractions(mockUserRepository,mockUserMapper);//care to use it together
+
+}
+
+@Test
+    void findByUsername_whenUserDoesNotExists_shouldReturnEmptyOptional() {
+        String nonExistingUsername= "Asghar polo";
+        when(mockUserRepository.findByUsername(nonExistingUsername)).thenReturn(Optional.empty());
+
+        //Act
+        Optional<UserResponseDto> resualtOptional = userService.findByUsername(nonExistingUsername);
+
+        //Assert
+    assertFalse(resualtOptional.isPresent(),"should return false when user does not exists");
+
+    //verify
+    verify(mockUserRepository, times(1)).findByUsername(nonExistingUsername);
+    verifyNoMoreInteractions(mockUserRepository);
+    verifyNoMoreInteractions(mockUserMapper);
+}
+
+
     // Arrange : prepare evreything needed. inputs dtos . expected things.
     // definde mock behaivier : wehen . donothing.
     //act: call method on @Injectedmocks

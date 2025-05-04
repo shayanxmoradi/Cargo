@@ -226,7 +226,7 @@ public class UserResourceIT {
 
         mockMvc.perform(delete("/user/{id}", nonExistentId))
                 .andDo(print())
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
 
         // Assert: Verify database state hasn't changed
         assertEquals(initialCount, userRepository.count(),
