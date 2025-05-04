@@ -284,4 +284,5 @@ public class UserResourceIT {
 
                 .andExpect(status().isNotFound());
     }
+
 }
