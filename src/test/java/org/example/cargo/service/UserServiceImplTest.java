@@ -14,7 +14,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page; // Import Page
+import org.springframework.data.domain.PageImpl; // Import PageImpl
+import org.springframework.data.domain.PageRequest; // Import PageRequest
+import org.springframework.data.domain.Pageable; // Import Pageable
 
+import java.util.Collections; // Import Collections
+import java.util.List; // Import List
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -346,7 +355,64 @@ class UserServiceImplTest {
     verifyNoMoreInteractions(mockUserRepository);
     verifyNoMoreInteractions(mockUserMapper);
 }
+    @Test
+    void findAll_withPageable_shouldReturnUserDtoPage() {
+        // Arrange
+        Pageable pageable = (Pageable) PageRequest.of(0, 10); // Example page request
+        // Create a list containing our sample user
+        List<User> userList = Collections.singletonList(sampleUser);
+        // Create a Page object that the repository mock will return
+        Page<User> userPage = new PageImpl<>(userList, pageable, 1); // List, Pageable, totalElements
 
+        // Mock repository's findAll(Pageable) to return the created page
+        when(mockUserRepository.findAll(eq(pageable))).thenReturn(userPage);
+        // Mock mapper to convert the sample user to the sample DTO
+        when(mockUserMapper.toResponseDto(eq(sampleUser))).thenReturn(sampleResponseDto);
+
+        // Act
+        Page<UserResponseDto> resultPage = userService.findAll(pageable);
+
+        // Assert
+        assertNotNull(resultPage, "Result page should not be null");
+        assertEquals(1, resultPage.getTotalElements(), "Total elements should be 1");
+        assertEquals(1, resultPage.getContent().size(), "Content list size should be 1");
+        assertEquals(sampleResponseDto, resultPage.getContent().get(0), "Content should contain the mapped DTO");
+        assertEquals(0, resultPage.getNumber(), "Page number should be 0");
+        assertEquals(10, resultPage.getSize(), "Page size should be 10");
+
+        // Verify
+        verify(mockUserRepository, times(1)).findAll(eq(pageable));
+        // Verify mapper was called once for the user in the list
+        verify(mockUserMapper, times(1)).toResponseDto(eq(sampleUser));
+        verifyNoMoreInteractions(mockUserRepository, mockUserMapper);
+    }
+
+    @Test
+    void findAll_withPageable_whenNoUsers_shouldReturnEmptyPage() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        // Create an empty Page object
+        Page<User> emptyUserPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+        // Mock repository's findAll(Pageable) to return the empty page
+        when(mockUserRepository.findAll(eq(pageable))).thenReturn(emptyUserPage);
+
+        // Act
+        Page<UserResponseDto> resultPage = userService.findAll(pageable);
+
+        // Assert
+        assertNotNull(resultPage, "Result page should not be null");
+        assertEquals(0, resultPage.getTotalElements(), "Total elements should be 0");
+        assertTrue(resultPage.getContent().isEmpty(), "Content list should be empty");
+        assertEquals(0, resultPage.getNumber(), "Page number should be 0");
+
+        // Verify
+        verify(mockUserRepository, times(1)).findAll(eq(pageable));
+        // Mapper should never be called if the content list is empty
+        verify(mockUserMapper, never()).toResponseDto(any(User.class));
+        verifyNoMoreInteractions(mockUserRepository);
+        verifyNoInteractions(mockUserMapper);
+    }
 
     // Arrange : prepare evreything needed. inputs dtos . expected things.
     // definde mock behaivier : wehen . donothing.
