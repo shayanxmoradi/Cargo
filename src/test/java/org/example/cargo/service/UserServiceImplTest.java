@@ -123,9 +123,8 @@ class UserServiceImplTest {
         userToSave.setEmail(createDto.email());
 
 
-        // Entity object returned by the repository save call (after saving, with ID)
         User savedUser = new User();
-        savedUser.setId(2L); // Simulate ID generation
+        savedUser.setId(2L);
         savedUser.setUsername(createDto.username());
         savedUser.setPassword(createDto.password());
         savedUser.setFirstName(createDto.firstName());
@@ -166,6 +165,7 @@ class UserServiceImplTest {
     //act: call method on @Injectedmocks
     //assert : verfiy method undertest produced the corerct result being excecuted in act. : assertEqual,asserttrue,assertnotnull
     //verify : optional : verifys, argumentcaptor,
+
 
 
     @Test
