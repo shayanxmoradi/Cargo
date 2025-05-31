@@ -251,16 +251,7 @@ class UserServiceImplTest {
         verifyNoMoreInteractions(mockUserRepository, mockUserMapper);
     }
 
-//    @Test
-//    void delete_whenUserDoesNotExist_shouldReturnEmptyOptional() {
-//        Long nonExistenId = 999l;
-//        when(mockUserRepository.findById(nonExistenId)).thenReturn(Optional.empty());
-//        userService.deleteById(nonExistenId);
-//    verify(mockUserRepository, times(1)).findById(nonExistenId);
-//  //  verify(mockUserRepository, times(1)).findById(nonExistenId);
-//    verifyNoMoreInteractions(mockUserRepository);
-//    verifyNoInteractions(mockUserMapper);
-//    }
+
 
     @Test
     void existsById_whenUserDoesNotExist_shouldReturnFalse() {
